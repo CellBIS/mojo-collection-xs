@@ -7,11 +7,8 @@ _*
 !.appveyor.cmd
 !.appveyor.yml
 !.perltidyrc
-dist.ini
 *.tar.gz
-simak.yml
 cpanfile.snapshot
-/bahan
 /venv
 /blib
 /pm_to_blib
@@ -22,10 +19,4 @@ cpanfile.snapshot
 /META.*
 /MYMETA.*
 /local
-/db-export
 /test
-/simakdata
-**/*.pid
-**/assetpack.db
-**/*.log
-/public/styles/cache

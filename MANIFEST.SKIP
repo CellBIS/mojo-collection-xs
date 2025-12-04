@@ -1,12 +1,22 @@
-# Skip build outputs
+# -- Skip VCS
+\.git
+\.github
+\.idea
+
+# -- Skip temp & dev artifacts
 ^blib/
+^pm_to_blib
 ^Makefile$
-^Makefile\.old$
-^pm_to_blib$
-^XS\.(c|o|bs)$
+^Makefile.old$
 ^MYMETA\.
-^MANIFEST\.
-^_build/
-^cover_db/
-~$
-\#$
+^META\.
+^.*\.tar\.gz$
+
+# -- Skip development-only dirs
+^test
+^venv/
+
+# -- Skip editor files
+\~
+\.swp$
+\.bak$
