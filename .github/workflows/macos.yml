@@ -1,23 +1,62 @@
 name: macos
+
 on:
   push:
-    branches:
-      - '*'
-    tags-ignore:
-      - '*'
+    branches: [ '*' ]
+    tags-ignore: [ '*' ]
   pull_request:
+
 jobs:
   perl:
-    runs-on: macOS-latest
+    name: macOS / perl ${{ matrix.perl-version }}
+    runs-on: macos-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          - '5.16'
+          - '5.18'
+          - '5.20'
+          - '5.22'
+          - '5.30'
+          - '5.36'
+          - '5.38'
+          - '5.40'
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+
       - name: Set up Perl
-        run: brew install perl
-      - name: perl -V
-        run: perl -V
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl-version }}
+
+      - name: Install cpanm
+        run: curl -L https://cpanmin.us | perl - App::cpanminus
+
+      - name: Update MakeMaker for Perl < 5.20
+        if: ${{ matrix.perl-version == '5.16' || matrix.perl-version == '5.18' }}
+        run: cpanm -n ExtUtils::MakeMaker
+
       - name: Install Dependencies
         run: |
-          curl -L https://cpanmin.us | perl - --installdeps .
-          curl -L https://cpanmin.us | perl - -n TAP::Formatter::GitHubActions
-      - name: Run Tests
-        run: prove --merge --formatter TAP::Formatter::GitHubActions -l t
+          cpanm -n --installdeps .
+          if [[ "${{ matrix.perl-version }}" =~ ^5\.1[68]$ ]]; then
+            echo "Skip TAP formatter"
+          else
+            cpanm -n TAP::Formatter::GitHubActions
+          fi
+
+      - name: Build XS
+        run: |
+          perl Makefile.PL
+          perl -MConfig -e 'system($Config{make}) == 0 or die "$Config{make} failed";'
+
+      - name: Run tests
+        run: |
+          if [[ "${{ matrix.perl-version }}" =~ ^5\.1[68]$ ]]; then
+            prove -b t
+          else
+            prove --merge --formatter TAP::Formatter::GitHubActions -b t
+          fi
