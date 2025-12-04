@@ -1,5 +1,5 @@
 
-Mojo::Collection::XS is a drop-in subclass of `Mojo::Collection` with hot
+**Mojo::Collection::XS** is a drop-in subclass of `Mojo::Collection` with hot
 paths implemented in XS for better performance on large lists.
 
 ## Features
