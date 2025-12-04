@@ -1,0 +1,12 @@
+# Skip build outputs
+^blib/
+^Makefile$
+^Makefile\.old$
+^pm_to_blib$
+^XS\.(c|o|bs)$
+^MYMETA\.
+^MANIFEST\.
+^_build/
+^cover_db/
+~$
+\#$
