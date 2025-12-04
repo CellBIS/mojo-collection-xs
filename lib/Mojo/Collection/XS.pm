@@ -1,7 +1,7 @@
 package Mojo::Collection::XS;
 use Mojo::Base 'Mojo::Collection';
 
-our $VERSION = '0.01';
+our $VERSION = '0.2';
 
 use XSLoader;
 XSLoader::load(__PACKAGE__, $VERSION);
