@@ -1,3 +1,4 @@
+[![](https://github.com/CellBIS/mojo-collection-xs/workflows/linux/badge.svg)](https://github.com/CellBIS/mojo-collection-xs/actions) [![](https://github.com/CellBIS/mojo-collection-xs/workflows/macos/badge.svg)](https://github.com/CellBIS/mojo-collection-xs/actions) [![](https://github.com/CellBIS/mojo-collection-xs/workflows/windows/badge.svg)](https://github.com/CellBIS/mojo-collection-xs/actions)
 
 **Mojo::Collection::XS** is a drop-in subclass of `Mojo::Collection` with hot
 paths implemented in XS for better performance on large lists.
