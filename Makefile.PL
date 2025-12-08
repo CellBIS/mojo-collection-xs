@@ -1,14 +1,15 @@
+use 5.016;
+
 use strict;
 use warnings;
 use ExtUtils::MakeMaker 7.64;
 
 WriteMakefile(
-  NAME             => 'Mojo::Collection::XS',
-  VERSION_FROM     => 'lib/Mojo/Collection/XS.pm',
-  ABSTRACT         => 'Fast XS subclass of Mojo::Collection with XS-based while',
-  AUTHOR           => 'Achmad Yusri Afandi <yusrideb@cpan.org>',
-  LICENSE          => 'perl',
-  MIN_PERL_VERSION => '5.016',
+  NAME         => 'Mojo::Collection::XS',
+  VERSION_FROM => 'lib/Mojo/Collection/XS.pm',
+  ABSTRACT     => 'Fast XS subclass of Mojo::Collection with XS-based while',
+  AUTHOR       => 'Achmad Yusri Afandi <yusrideb@cpan.org>',
+  LICENSE      => 'artistic_2',
 
   PREREQ_PM => {Mojolicious => 0,},
 
@@ -16,7 +17,9 @@ WriteMakefile(
   OBJECT => '$(O_FILES)',
 
   META_MERGE => {
-    provides  => {'Mojo::Collection::XS' => {file => 'lib/Mojo/Collection/XS.pm', version => '0.2',},},
+    no_index  => {directory              => ['test']},
+    prereqs   => {runtime                => {requires => {perl => '5.016'}}},
+    provides  => {'Mojo::Collection::XS' => {file     => 'lib/Mojo/Collection/XS.pm', version => '0.2',},},
     resources => {
       repository => {
         type => 'git',
@@ -25,7 +28,6 @@ WriteMakefile(
       },
       bugtracker => {web => 'https://github.com/CellBIS/mojo-collection-xs/issues',},
     },
-    no_index => {directory => ['test'],},
   },
 
   META_ADD => {
