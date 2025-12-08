@@ -8,7 +8,7 @@ WriteMakefile(
   ABSTRACT         => 'Fast XS subclass of Mojo::Collection with XS-based while',
   AUTHOR           => 'Achmad Yusri Afandi <yusrideb@cpan.org>',
   LICENSE          => 'perl',
-  MIN_PERL_VERSION => '5.16',
+  MIN_PERL_VERSION => '5.016',
 
   PREREQ_PM => {Mojolicious => 0,},
 
