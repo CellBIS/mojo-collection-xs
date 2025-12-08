@@ -12,11 +12,10 @@ if (!$ENV{TEST_BENCH}) {
 eval { require Benchmark; 1 } or plan skip_all => "Benchmark module required";
 Benchmark->import(':all');
 
-eval { require Mojo::Collection; 1 } or plan skip_all => "Mojo::Collection required";
-
+eval { require Mojo::Collection;     1 } or plan skip_all => "Mojo::Collection required";
 eval { require Mojo::Collection::XS; 1 } or plan skip_all => "Mojo::Collection::XS required";
 
-diag "Running Mojo::Collection vs Mojo::Collection::XS benchmarks";
+diag "Running benchmarks: Pure Perl vs Mojo::Collection vs Mojo::Collection::XS";
 diag "Perl version: $^V";
 diag "TEST_BENCH=1 → benchmark enabled";
 
@@ -24,57 +23,80 @@ my $SIZE = $ENV{BENCH_SIZE} || 200_000;
 diag "Benchmark size: $SIZE items";
 
 # Prepare data
-my @data = (1 .. $SIZE);
+my @data = map { {id => $_, score => ($_ * 7) % 101, flag => ($_ & 1) ? 0 : 1, name => "item$_",} } 1 .. $SIZE;
 
-my $pure = Mojo::Collection->new(@data);
-my $xs   = Mojo::Collection::XS->new(@data);
+my $pure_mojo = Mojo::Collection->new(@data);        # Mojo::Collection (pure Perl)
+my $xs_mojo   = Mojo::Collection::XS->new(@data);    # Mojo::Collection::XS (XS-backed)
+my $pure_perl = [@data];                             # raw Perl arrayref for baselines
+
+my $work = sub {
+  my ($row) = @_;
+  my $v = $row->{score};
+  $v += length($row->{name});
+  $v ^= ($row->{id} & 0xFF);
+  $v += $row->{flag};
+  return $v;
+};
 
 # Actual benchmark
-diag "Running benchmark over XS helpers: while_fast, while_ultra_fast, each_fast, map_fast, map_ultra_fast, grep_fast";
+diag "Running benchmark over XS helpers: while_fast, while_ultra, each_fast, map_fast, map_ultra, grep_fast";
 
 my %benchmarks = (
-  pure_each_sum => sub {
+  perl_for_sum => sub {    # pure Perl baseline
     my $sum = 0;
-    $pure->each(sub { $sum += $_[0] });
+    $sum += $work->($_) for @$pure_perl;
     return $sum;
   },
-  xs_each_fast_sum => sub {
+  perl_map_size => sub {    # pure Perl map baseline
+    my $out = [map { $work->($_) } @$pure_perl];
+    return scalar @$out;
+  },
+  perl_grep_even_size => sub {    # pure Perl grep baseline
+    my $out = [grep { ($work->($_) & 1) == 0 } @$pure_perl];
+    return scalar @$out;
+  },
+  mojo_each_sum => sub {          # Mojo::Collection (pure Perl impl)
     my $sum = 0;
-    $xs->each_fast(sub { $sum += $_[0] });
+    $pure_mojo->each(sub { $sum += $work->($_[0]) });
     return $sum;
   },
-  xs_while_fast_sum => sub {
+  xs_each_fast_sum => sub {       # XS each_fast
     my $sum = 0;
-    $xs->while_fast(sub { $sum += $_[0] });
+    $xs_mojo->each_fast(sub { $sum += $work->($_[0]) });
     return $sum;
   },
-  xs_while_ultra_fast_sum => sub {
+  xs_while_fast_sum => sub {      # XS while_fast
     my $sum = 0;
-    $xs->while_ultra_fast(sub { my ($e) = @_; $sum += $e });
+    $xs_mojo->while_fast(sub { $sum += $work->($_[0]) });
     return $sum;
   },
-  pure_map_list => sub {
-    my $out = $pure->map(sub { $_[0] * 2 });
+  xs_while_ultra_sum => sub {     # XS while_ultra
+    my $sum = 0;
+    $xs_mojo->while_ultra(sub { my ($e) = @_; $sum += $work->($e) });
+    return $sum;
+  },
+  mojo_map_list => sub {          # Mojo::Collection map (list)
+    my $out = $pure_mojo->map(sub { $work->($_[0]) });
     return $out->size;
   },
-  xs_map_fast_list => sub {
-    my $out = $xs->map_fast(sub { $_[0] * 2 });
+  xs_map_fast_list => sub {       # XS map_fast (list)
+    my $out = $xs_mojo->map_fast(sub { $work->($_[0]) });
     return $out->size;
   },
-  pure_map_scalar => sub {
-    my $out = $pure->map(sub { $_[0] + 1 });
+  mojo_map_scalar => sub {        # Mojo::Collection map (scalar-ish)
+    my $out = $pure_mojo->map(sub { $work->($_[0]) + 1 });
     return $out->size;
   },
-  xs_map_ultra_fast_scalar => sub {
-    my $out = $xs->map_ultra_fast(sub { my ($e) = @_; $e + 1 });
+  xs_map_ultra_scalar => sub {    # XS map_ultra
+    my $out = $xs_mojo->map_ultra(sub { my ($e) = @_; $work->($e) + 1 });
     return $out->size;
   },
-  pure_grep_even => sub {
-    my $out = $pure->grep(sub { !($_[0] & 1) });
+  mojo_grep_even => sub {         # Mojo::Collection grep
+    my $out = $pure_mojo->grep(sub { ($work->($_[0]) & 1) == 0 });
     return $out->size;
   },
-  xs_grep_fast_even => sub {
-    my $out = $xs->grep_fast(sub { my ($e) = @_; !($e & 1) });
+  xs_grep_fast_even => sub {      # XS grep_fast
+    my $out = $xs_mojo->grep_fast(sub { my ($e) = @_; ($work->($e) & 1) == 0 });
     return $out->size;
   },
 );
