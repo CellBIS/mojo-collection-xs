@@ -2,7 +2,8 @@ use 5.016;
 
 use strict;
 use warnings;
-use ExtUtils::MakeMaker 7.64;
+
+use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME         => 'Mojo::Collection::XS',
