@@ -20,7 +20,7 @@ WriteMakefile(
   META_MERGE => {
     no_index  => {directory              => ['test']},
     prereqs   => {runtime                => {requires => {perl => '5.016'}}},
-    provides  => {'Mojo::Collection::XS' => {file     => 'lib/Mojo/Collection/XS.pm', version => '0.2',},},
+    provides  => {'Mojo::Collection::XS' => {file     => 'lib/Mojo/Collection/XS.pm', version => '0.3',},},
     resources => {
       repository => {
         type => 'git',
