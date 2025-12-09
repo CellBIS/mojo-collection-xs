@@ -10,6 +10,8 @@
 ^\.gitattributes$
 
 # Skip editor & temporary files
+^_.*$
+^.*/_.*$
 ~$
 \.swp$
 \.bak$
@@ -27,7 +29,7 @@
 
 # Skip development-only directories
 ^test/
+^venv/
 
 # Skip perltidy config
 ^\.perltidyrc$
-
